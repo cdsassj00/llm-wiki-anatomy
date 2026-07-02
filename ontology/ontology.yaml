@@ -1,0 +1,69 @@
+# ontology/ontology.yaml
+#   ※ 온톨로지에 정답 구조는 없다. 이 파일은 "트리플 패턴 + 강의안" 예시일 뿐이다.
+# ─────────────────────────────────────────────────────────────
+# 이 파일이 위키의 뼈대다. 모든 레시피(01~06)가 이 파일을 읽는다.
+# 패턴: ① 트리플(개념-개체-관계). 다른 패턴(계층/패싯/이벤트/최소)은 GUIDE.md 참고
+# 아래는 "강의안 위키" 예시. 자기 목적에 맞게 수정해서 쓸 것.
+# ─────────────────────────────────────────────────────────────
+
+pattern: triple   # triple | taxonomy | facet | event | minimal — GUIDE.md에서 선택
+
+meta:
+  name: "강의안 위키"
+  purpose: "기존 강의안을 검색·재조합해 새 강의안/커리큘럼을 만든다"
+
+# ── 검색 계약: 이 위키에 실제로 던질 질문들 (구축 후 검증에도 사용) ──
+contract:
+  questions:
+    - "콘솔을 가르쳤던 기관과 그때 실습 내용은?"
+    - "생성형 AI 주제로 공공기관에서 했던 이론 파트 모아줘"
+    - "이 모듈을 다른 커리큘럼에 재조합하고 싶다"
+
+# ── 원문 위치 ──
+source:
+  input_dir: "D:/lectures"
+  formats: [pdf, pptx, docx, md, html]
+
+# ── 개체(Entity): 실존하는 것들 ──────────────────────────────
+entities:
+  document:                 # 중심 개체 — 위키에 쌓이는 단위
+    label: 강의안
+    fields: [title, date, source_path]   # source_path = 원문 포인터, 필수
+  org:
+    label: 강의기관
+    examples: [삼성전자, 카카오엔터테인먼트, 행안부]
+  module:
+    label: 모듈
+    examples: [Claude Code 기초, MCP 실습]
+
+# ── 개념(Concept): 검색어가 되는 추상 단위 ───────────────────
+concepts:
+  topic:
+    label: 주제
+    examples: [생성형 AI 실무활용, 바이브코딩]
+  theory:
+    label: 이론
+    examples: [콘솔, 에이전트 루프, 하네스]
+  practice:
+    label: 실습
+    examples: [옵시디언 연동, HWPX 생성]
+
+# ── 관계(Relation): 개념과 개체를 잇는 링크 ──────────────────
+# [주어, 술어, 목적어] — "콘솔" 검색 시 이 관계를 타고
+# 기관·이론·실습·주제가 엮여 나온다.
+relations:
+  - [document, delivered_at, org]        # 이 강의안은 이 기관에서 했다
+  - [document, belongs_to,   topic]      # 이 강의안은 이 주제다
+  - [document, contains,     module]     # 이 강의안은 이 모듈을 포함한다
+  - [module,   explains,     theory]     # 이 모듈은 이 이론을 설명한다
+  - [module,   trains,       practice]   # 이 모듈은 이 실습을 훈련한다
+
+# ── 각 레시피에서 이 구조가 어떻게 물질화되는가 ──────────────
+# (표현만 다르고 본질은 같다 — 이게 이 레포의 핵심 주장)
+materialization:
+  01-wiki-md:   "relations → [[위키링크]], concepts → 개념 노트, 그래프뷰 엣지"
+  02-sqlite-db: "entities → 테이블, relations → 외래키/조인 테이블"
+  03-mcp-server: "02와 동일, 접근만 MCP 툴콜"
+  04-rag:       "concepts/entities → 청크 메타데이터 필드"
+  05-rss-static: "topic → <category>, document → <item>, source_path → <link>"
+  06-okf:       "개념 → md파일(type frontmatter), relations → md 링크, source_path → resource"

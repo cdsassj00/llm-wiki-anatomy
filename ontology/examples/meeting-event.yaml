@@ -1,0 +1,30 @@
+# ontology/examples/meeting-event.yaml — ④ 이벤트 패턴 예시 (회의록 위키)
+# 트리플이 아니다 — 시간축 로그가 뼈대이고, 관계 대신 스레드(이어짐)를 쓴다.
+
+pattern: event
+
+meta:
+  name: "회의록 위키"
+  purpose: "결정사항과 액션아이템을 시간축으로 추적한다"
+
+contract:
+  questions:
+    - "ASTIS 착수보고 이후 범위 관련 결정이 어떻게 바뀌어 왔나?"
+    - "지난달 김OO에게 할당된 액션아이템 중 미완료는?"
+    - "이 프로젝트에서 예산 이야기가 나온 회의 전부, 시간순으로"
+
+# ── 이벤트 패턴의 구성 ──
+event:                       # 로그의 한 줄 = 회의 하나
+  fields: [date, project, attendees, source_path]
+
+extract_per_event:           # 각 이벤트에서 뽑아 쌓는 것
+  decisions:                 # 결정: 무엇을 하기로 했나
+    fields: [text, supersedes]   # supersedes = 이전 결정을 뒤집으면 그 ID
+  action_items:              # 액션: 누가 언제까지
+    fields: [text, owner, due, status]
+
+threads:                     # 스레드: 같은 화제의 이벤트들을 잇는 실
+  by: [project, topic_keyword]   # 프로젝트별 + 키워드별로 시간순 연결
+
+# 검색은 필터+정렬이다: project=ASTIS AND keyword=범위 → date 순 정렬
+# → 결정의 supersedes 체인을 따라가면 "어떻게 바뀌어 왔나"가 나온다.

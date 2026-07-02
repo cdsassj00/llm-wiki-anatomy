@@ -1,0 +1,31 @@
+# ontology/examples/proposal.yaml — ③ 패싯 패턴 예시 (제안서 위키)
+# 제안서는 축끼리 얽히기보다 "필터 조합"으로 검색된다 → 패싯이 자연스럽다.
+# 트리플처럼 관계를 정의하지 않는다. 독립된 태그축들만 있다.
+
+pattern: facet
+
+meta:
+  name: "제안서 위키"
+  purpose: "과거 제안서를 검색·재활용해 새 입찰 제안서를 빠르게 조립한다"
+
+contract:
+  questions:
+    - "공공 × 컨설팅 × 수주한 것만 필터해서 핵심전략 모아줘"
+    - "1천~5천 예산구간의 교육사업 제안서 전부"
+    - "농진청 계열 발주기관에 냈던 것 중 최근 2년"
+
+document:
+  label: 제안서
+  fields: [title, date, source_path, result]   # result: 수주/탈락
+
+# ── 패싯: 서로 독립인 필터축. 관계 없음, 조합 검색이 전부 ──
+facets:
+  client_type:  {label: 발주기관유형, values: [중앙부처, 지자체, 공공기관, 민간]}
+  biz_type:     {label: 사업유형,     values: [교육, 컨설팅, 시스템구축]}
+  budget_band:  {label: 예산구간,     values: [1천만 미만, 1천~5천, 5천 이상]}
+  strategy:     {label: 핵심전략,     open: true}   # open: 값 목록 고정 안 함
+  track_record: {label: 인용실적,     open: true}
+
+# 검색 = 패싯 AND 조합 + 결과의 source_path로 원문 도달.
+# 나중에 "이 전략을 쓴 제안서끼리의 관계"가 궁금해지면
+# 그때 트리플 관계를 한 줄 얹으면 된다 (패턴은 혼합 가능).
